@@ -1,0 +1,14 @@
+release/classthreadmanage.o
+release/customcombobox.o
+release/customserver.o
+release/databasemanager.o
+release/firstuserthread.o
+release/main.o
+release/mainwindow.o
+release/userdatamodel.o
+release/qrc_res.o
+release/moc_customcombobox.o
+release/moc_customserver.o
+release/moc_firstuserthread.o
+release/moc_mainwindow.o
+release/moc_userdatamodel.o

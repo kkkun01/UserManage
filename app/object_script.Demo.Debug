@@ -1,0 +1,14 @@
+debug/classthreadmanage.o
+debug/customcombobox.o
+debug/customserver.o
+debug/databasemanager.o
+debug/firstuserthread.o
+debug/main.o
+debug/mainwindow.o
+debug/userdatamodel.o
+debug/qrc_res.o
+debug/moc_customcombobox.o
+debug/moc_customserver.o
+debug/moc_firstuserthread.o
+debug/moc_mainwindow.o
+debug/moc_userdatamodel.o

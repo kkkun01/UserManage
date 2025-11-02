@@ -1,0 +1,19 @@
+Language: Cpp
+# 彻底禁用基础风格，避免Google风格的默认规则冲突
+BasedOnStyle: None
+
+# 括号换行核心规则（强制if等控制语句的左大括号单独成行）
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterControlStatement: true  # if/for/while后换行
+  BeforeElse: true             # else前换行
+  IndentBraces: false          # 大括号不缩进
+
+# 禁止任何单行块（确保即使单行代码也换行）
+AllowShortBlocksOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: false
+
+# 缩进设置（与大括号对齐）
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
