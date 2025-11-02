@@ -1,5 +1,5 @@
 #include "userdatamodel.h"
-#include "DatabaseManager.h"
+#include "database/databasemanager.h"
 #include <QDebug>
 #include <QMessageBox>
 

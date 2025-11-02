@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "common.h"
+#include "common/common.h"
 #include <QStylePainter>
 #include <QDebug>
 #include <QMessageBox>
@@ -51,12 +51,12 @@ void MainWindow::ConnectSlot()
         m_CurClassStr = m_currentItem->parent()->text(0);
         m_CurUserStr = m_currentItem->text(0);
         qDebug()<<"classname"<<m_CurClassStr<<"username"<<m_CurUserStr;
-        m_UserThread = new FirstUserThread(m_CurClassStr,m_CurUserStr,m_model);
+        m_UserThread = new ClassUserThread(m_CurClassStr,m_CurUserStr,m_model);
         if(!m_UserThread->isRunning())
         {
              m_UserThread->start();
         }
-        connect(m_UserThread,&FirstUserThread::sglDataGenerated,this,&MainWindow::ShowUserData);
+        connect(m_UserThread,&ClassUserThread::sglDataGenerated,this,&MainWindow::ShowUserData);
     });
 
     connect(ui->classtreeWidget, &QTreeWidget::itemClicked, this,[this](){

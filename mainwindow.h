@@ -2,12 +2,11 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "customcombobox.h"
-#include "firstuserthread.h"
-#include "userdatamodel.h"
-//#include "classthreadmanage.h"
+#include "customtools/customcombobox.h"
+#include"threadmanage/classUserthread.h"
+#include "userdata/userdatamodel.h"
 #include <QTreeWidgetItem>
-#include "customserver.h"
+#include "server/customserver.h"
 namespace Ui {
 class MainWindow;
 }
@@ -40,7 +39,7 @@ private:
 //    CustomComboBox *m_CmbClassA = nullptr;
 //    CustomComboBox *m_CmbClassB = nullptr;
     UserDataModel *m_model = nullptr;
-    FirstUserThread *m_UserThread = nullptr;
+    ClassUserThread *m_UserThread = nullptr;
     QTreeWidgetItem * m_currentItem = nullptr;
     QTreeWidgetItem * m_userDataItem = nullptr;
     QList<QVariantList>m_UserCurrdata;

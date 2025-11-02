@@ -2,13 +2,13 @@
 #include <QList>
 #include <QPair>
 #include <random>  // 包含C++标准随机数库
-#include "firstuserthread.h"
+#include "classUserthread.h"
 #include "QDebug"
 
-FirstUserThread::FirstUserThread(const QString &className, const QString &userName, UserDataModel *model, QObject *parent)
+ClassUserThread::ClassUserThread(const QString &className, const QString &userName, UserDataModel *model, QObject *parent)
     : QThread(parent), m_className(className), m_userName(userName), m_model(model) {}
 
-void FirstUserThread::run()
+void ClassUserThread::run()
 {
     qDebug() << "FirstUserThread 当前线程ID: " << QThread::currentThreadId();
 

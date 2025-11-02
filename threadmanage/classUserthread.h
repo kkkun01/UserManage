@@ -3,13 +3,13 @@
 
 #include <QObject>
 #include <QThread>
-#include "userdatamodel.h"
+#include "userdata/userdatamodel.h"
 
-class FirstUserThread:public QThread
+class ClassUserThread:public QThread
 {
     Q_OBJECT
 public:
-    explicit FirstUserThread(const QString &className, const QString &userName, UserDataModel *model, QObject *parent = nullptr);
+    explicit ClassUserThread(const QString &className, const QString &userName, UserDataModel *model, QObject *parent = nullptr);
 
     virtual void run();
 

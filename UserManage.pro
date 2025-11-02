@@ -27,27 +27,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++11
 
-
-
+include($$PWD/userdata/userdatamodel.pri)
+include($$PWD/common/common.pri)
+include($$PWD/database/databasemanager.pri)
+include($$PWD/server/customserver.pri)
+include($$PWD/customtools/customtools.pri)
+include($$PWD/threadmanage/threadmanage.pri)
 SOURCES += \
-        classthreadmanage.cpp \
-        customcombobox.cpp \
-        customserver.cpp \
-        databasemanager.cpp \
-        firstuserthread.cpp \
-        main.cpp \
-        mainwindow.cpp \
-        userdatamodel.cpp
+        mainwindow.cpp\
+        main.cpp
 
 HEADERS += \
-        classthreadmanage.h \
-        common.h \
-        customcombobox.h \
-        customserver.h \
-        databasemanager.h \
-        firstuserthread.h \
-        mainwindow.h \
-        userdatamodel.h
+        mainwindow.h
 
 FORMS += \
         mainwindow.ui
