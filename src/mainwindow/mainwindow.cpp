@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "common/common.h"
+#include "common.h"
 #include <QStylePainter>
 #include <QDebug>
 #include <QMessageBox>

@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QThread>
-#include "userdata/userdatamodel.h"
+#include "userdatamodel.h"
 
 class ClassUserThread:public QThread
 {

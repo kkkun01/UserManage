@@ -214,12 +214,13 @@ Makefile: ../UserManage.pro ../../../../QT/5.12.4/mingw73_32/mkspecs/win32-g++/q
 		../../../../QT/5.12.4/mingw73_32/mkspecs/features/toolchain.prf \
 		../../../../QT/5.12.4/mingw73_32/mkspecs/features/default_pre.prf \
 		../../../../QT/5.12.4/mingw73_32/mkspecs/features/win32/default_pre.prf \
-		../userdata/userdatamodel.pri \
-		../common/common.pri \
-		../database/databasemanager.pri \
-		../server/customserver.pri \
-		../customtools/customtools.pri \
-		../threadmanage/threadmanage.pri \
+		../src/userdata/userdatamodel.pri \
+		../src/common/common.pri \
+		../src/database/databasemanager.pri \
+		../src/server/customserver.pri \
+		../src/customtools/customtools.pri \
+		../src/threadmanage/threadmanage.pri \
+		../src/mainwindow/mainwindow.pri \
 		../../../../QT/5.12.4/mingw73_32/mkspecs/features/resolve_config.prf \
 		../../../../QT/5.12.4/mingw73_32/mkspecs/features/exclusive_builds_post.prf \
 		../../../../QT/5.12.4/mingw73_32/mkspecs/features/default_post.prf \
@@ -397,12 +398,13 @@ Makefile: ../UserManage.pro ../../../../QT/5.12.4/mingw73_32/mkspecs/win32-g++/q
 ../../../../QT/5.12.4/mingw73_32/mkspecs/features/toolchain.prf:
 ../../../../QT/5.12.4/mingw73_32/mkspecs/features/default_pre.prf:
 ../../../../QT/5.12.4/mingw73_32/mkspecs/features/win32/default_pre.prf:
-../userdata/userdatamodel.pri:
-../common/common.pri:
-../database/databasemanager.pri:
-../server/customserver.pri:
-../customtools/customtools.pri:
-../threadmanage/threadmanage.pri:
+../src/userdata/userdatamodel.pri:
+../src/common/common.pri:
+../src/database/databasemanager.pri:
+../src/server/customserver.pri:
+../src/customtools/customtools.pri:
+../src/threadmanage/threadmanage.pri:
+../src/mainwindow/mainwindow.pri:
 ../../../../QT/5.12.4/mingw73_32/mkspecs/features/resolve_config.prf:
 ../../../../QT/5.12.4/mingw73_32/mkspecs/features/exclusive_builds_post.prf:
 ../../../../QT/5.12.4/mingw73_32/mkspecs/features/default_post.prf:

@@ -27,21 +27,21 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++11
 
-include($$PWD/userdata/userdatamodel.pri)
-include($$PWD/common/common.pri)
-include($$PWD/database/databasemanager.pri)
-include($$PWD/server/customserver.pri)
-include($$PWD/customtools/customtools.pri)
-include($$PWD/threadmanage/threadmanage.pri)
-SOURCES += \
-        mainwindow.cpp\
-        main.cpp
+include($$PWD/src/userdata/userdatamodel.pri)
+include($$PWD/src/common/common.pri)
+include($$PWD/src/database/databasemanager.pri)
+include($$PWD/src/server/customserver.pri)
+include($$PWD/src/customtools/customtools.pri)
+include($$PWD/src/threadmanage/threadmanage.pri)
+include($$PWD/src/mainwindow/mainwindow.pri)
 
-HEADERS += \
-        mainwindow.h
-
-FORMS += \
-        mainwindow.ui
+INCLUDEPATH += $$PWD/src/userdata
+INCLUDEPATH += $$PWD/src/common
+INCLUDEPATH += $$PWD/src/database
+INCLUDEPATH += $$PWD/src/server
+INCLUDEPATH += $$PWD/src/customtools
+INCLUDEPATH += $$PWD/src/threadmanage
+INCLUDEPATH += $$PWD/src/mainwindow
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

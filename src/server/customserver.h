@@ -5,7 +5,7 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QHostAddress>
-#include "common/common.h"
+#include "common.h"
 
 class CustomServer : public QObject
 {

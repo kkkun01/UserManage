@@ -2,11 +2,11 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "customtools/customcombobox.h"
-#include"threadmanage/classUserthread.h"
-#include "userdata/userdatamodel.h"
+#include "customcombobox.h"
+#include"classUserthread.h"
+#include "userdatamodel.h"
 #include <QTreeWidgetItem>
-#include "server/customserver.h"
+#include "customserver.h"
 namespace Ui {
 class MainWindow;
 }
