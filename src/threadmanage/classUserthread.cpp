@@ -3,7 +3,9 @@
 #include <QPair>
 #include <random>  // 包含C++标准随机数库
 #include "classUserthread.h"
-#include "QDebug"
+#include "userdatamodel.h"  // 包含 UserDataModel 类声明
+#include "common.h"         // 包含 UserRecord 结构体定义
+#include <QDebug>
 
 ClassUserThread::ClassUserThread(const QString &className, const QString &userName, UserDataModel *model, QObject *parent)
     : QThread(parent), m_className(className), m_userName(userName), m_model(model) {}
@@ -11,37 +13,36 @@ ClassUserThread::ClassUserThread(const QString &className, const QString &userNa
 void ClassUserThread::run()
 {
     qDebug() << "FirstUserThread 当前线程ID: " << QThread::currentThreadId();
-
+    
     QStringList infoList = {"喜欢玩", "喜欢学习", "喜欢运动"};
     QStringList statusList = {"学习", "休息", "娱乐"};
-    QList<QVariantList> dataList;
-
-    // 仅使用线程ID生成唯一种子
-    // 1. 获取当前线程ID
+    QList<UserRecord> dataList;  // 改为 UserRecord 列表，而非 QVariantList
+    
+    // 仅使用线程ID生成唯一种子（保持原有随机逻辑不变）
     std::thread::id threadId = std::this_thread::get_id();
-
-    // 2. 将线程ID转换为哈希值（可作为整数种子使用）
     std::hash<std::thread::id> hasher;
-    size_t seed = hasher(threadId); // 线程ID的哈希值作为种子
-
-    // 使用线程唯一的种子初始化随机数生成器
+    size_t seed = hasher(threadId);
     std::mt19937 gen(static_cast<unsigned int>(seed));
-
+    
     // 定义分布器
     std::uniform_int_distribution<> infoDist(0, infoList.size() - 1);
     std::uniform_int_distribution<> statusDist(0, statusList.size() - 1);
-
-    // 生成100条随机数据
+    
+    // 生成100条随机数据：构造 UserRecord 结构体
     for (int i = 0; i < 100; ++i) {
-        QString info = infoList[infoDist(gen)];
-        QString status = statusList[statusDist(gen)];
-        QVariantList dataItem;
-        dataItem << i << info << status;
-        dataList.append(dataItem);
+        UserRecord record;
+        record.serialNumber = i;                  // 序号（原 i 对应 serialNumber）
+        record.interest = infoList[infoDist(gen)]; // 兴趣（原 info 对应 interest）
+        record.status = statusList[statusDist(gen)]; // 状态（原 status 对应 status）
+        dataList.append(record);                  // 添加到结构化列表
     }
-
-    qDebug() << "线程" << m_userName << "完成工作" << dataList.first();
+    
+    qDebug() << "线程" << m_userName << "完成工作，第一条数据：" 
+             << "序号=" << dataList.first().serialNumber 
+             << "兴趣=" << dataList.first().interest 
+             << "状态=" << dataList.first().status;
+    
+    // 调用模型接口：传入 UserRecord 列表（与新的 setUserData 接口匹配）
     m_model->setUserData(m_className, m_userName, dataList);
     emit sglDataGenerated(m_className, m_userName);
 }
-

@@ -4,17 +4,15 @@
 #include <QStylePainter>
 #include <QDebug>
 #include <QMessageBox>
+#include <QTableWidgetItem>
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent) :QMainWindow(parent),ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-//    m_CmbClassA = new CustomComboBox(this);
-//    m_CmbClassB = new CustomComboBox(this);
-//    InitMyCombox();
     m_model = new UserDataModel(this);
     m_Server = new CustomServer(this);
+    // 初始化数据库（新增：程序启动时加载数据）
+    m_model->initDataBase();
     ConnectSlot();
 }
 
@@ -25,129 +23,124 @@ MainWindow::~MainWindow()
 
 void MainWindow::InitMyCombox()
 {
-//    // 添加选项
-//    QStringList itemsA = {"小明", "小华", "小张"};
-//    m_CmbClassA->addItems(itemsA);
-//    m_CmbClassA->setCustomCbxTitle(CLASS1_STR);
-//    QStringList itemsB = {"查理", "小歆", "小朱"};
-//    m_CmbClassB->addItems(itemsB);
-//    m_CmbClassB->setCustomCbxTitle(CLASS2_STR);
-//    QIcon icon(":/image/file.jpeg");
-//    for(int i = 0; i < m_CmbClassA->count(); ++i) {
-//        m_CmbClassA->setItemIcon(i, icon);
-//        m_CmbClassB->setItemIcon(i, icon);
-//    }
-//    m_CmbClassA->setGeometry(50,50,100,20);
-//    m_CmbClassB->setGeometry(50,150,100,20);
-
-//    m_CmbClassA->setLayoutDirection(Qt::RightToLeft);
-//    m_CmbClassB->setLayoutDirection(Qt::RightToLeft);
+    // 保留原有逻辑（若需使用可解锁）
 }
 
 void MainWindow::ConnectSlot()
 {
     connect(ui->btn_makenum,&QPushButton::clicked,this,[&](){
         m_currentItem = ui->classtreeWidget->currentItem();
+        if (!m_currentItem || !m_currentItem->parent()) {
+            QMessageBox::warning(this, "警告", "请选中具体用户（非班级节点）");
+            return;
+        }
         m_CurClassStr = m_currentItem->parent()->text(0);
         m_CurUserStr = m_currentItem->text(0);
         qDebug()<<"classname"<<m_CurClassStr<<"username"<<m_CurUserStr;
-        m_UserThread = new ClassUserThread(m_CurClassStr,m_CurUserStr,m_model);
-        if(!m_UserThread->isRunning())
-        {
-             m_UserThread->start();
+        
+        // 避免重复创建线程
+        if (m_UserThread) {
+            m_UserThread->quit();
+            m_UserThread->wait();
+            delete m_UserThread;
+            m_UserThread = nullptr;
         }
+        m_UserThread = new ClassUserThread(m_CurClassStr, m_CurUserStr, m_model);
         connect(m_UserThread,&ClassUserThread::sglDataGenerated,this,&MainWindow::ShowUserData);
+        m_UserThread->start();
     });
-
+    
     connect(ui->classtreeWidget, &QTreeWidget::itemClicked, this,[this](){
         m_currentItem = ui->classtreeWidget->currentItem();
+        if (!m_currentItem || !m_currentItem->parent()) {
+            ui->datatreeWidget->clear();
+            return; // 点击班级节点时清空数据展示
+        }
         m_CurClassStr = m_currentItem->parent()->text(0);
         m_CurUserStr = m_currentItem->text(0);
-        ShowUserData(m_CurClassStr,m_CurUserStr);
-    });
-
-    connect(ui->datatreeWidget, &QTreeWidget::itemClicked, this,[this](){
-        for (int col = 0; col < 3; ++col) {
-            ui->datatreeWidget->resizeColumnToContents(col);
-        }
-        if(m_rowAllow)
-        {
-          m_model->ChangeUserData(m_CurindexStr.toInt(), m_userDataItem->text(0).toInt(),m_userDataItem->text(1),m_userDataItem->text(2));
-          qDebug()<<"oldnum"<<m_CurindexStr.toInt()<<"new num"<<m_userDataItem->text(0).toInt()<<m_userDataItem->text(1)<<m_userDataItem->text(2);
-          m_CurindexStr = m_userDataItem->text(0);
-        }else
-        {
-            QMessageBox::information(this,
-                                     "提示",
-                                     "请点击编辑按钮",
-                                     QMessageBox::Ok);
-        }
+        ShowUserData(m_CurClassStr, m_CurUserStr);
     });
     
-   connect(m_Server, &CustomServer::sglHttpChangeUserData,this, &MainWindow::slotHttpChangeUserData,Qt::DirectConnection);
-    
+//    connect(ui->datatreeWidget, &QTreeWidget::itemClicked, this,[this](){
+//        for (int col = 0; col < 3; ++col) {
+//            ui->datatreeWidget->resizeColumnToContents(col);
+//        }
+//        m_userDataItem = ui->datatreeWidget->currentItem();
+//        if(m_rowAllow && m_userDataItem)
+//        {
+//            // 从树节点获取修改后的数据（序号、兴趣、状态）
+//            int newNum = m_userDataItem->text(0).toInt();
+//            QString newInfo = m_userDataItem->text(1);
+//            QString newStatus = m_userDataItem->text(2);
+//            // 调用模型接口修改数据（按原序号匹配）
+//            m_model->ChangeUserData(m_CurindexStr.toInt(), newNum, newInfo, newStatus);
+//            qDebug()<<"oldnum"<<m_CurindexStr.toInt()<<"new num"<<newNum<<newInfo<<newStatus;
+//            m_CurindexStr = QString::number(newNum);
+//            m_userDataItem->setFlags(m_userDataItem->flags() & ~Qt::ItemIsEditable);
+//        }else if(!m_rowAllow)
+//        {
+//            QMessageBox::information(this, "提示", "请点击编辑按钮");
+//        }
+//        });
+        connect(ui->datatreeWidget, &QTreeWidget::itemClicked, this,[this](){
+            for (int col = 0; col < 3; ++col) {
+                ui->datatreeWidget->resizeColumnToContents(col);
+            }
+            if(m_rowAllow)
+            {
+                m_model->ChangeUserData(m_CurindexStr.toInt(), m_userDataItem->text(0).toInt(),m_userDataItem->text(1),m_userDataItem->text(2));
+                qDebug()<<"oldnum"<<m_CurindexStr.toInt()<<"new num"<<m_userDataItem->text(0).toInt()<<m_userDataItem->text(1)<<m_userDataItem->text(2);
+                m_CurindexStr = m_userDataItem->text(0);
+            }else
+            {
+                QMessageBox::information(this,
+                                         "提示",
+                                         "请点击编辑按钮",
+                                         QMessageBox::Ok);
+            }
+        });
+        
+    connect(m_Server, &CustomServer::sglHttpChangeUserData,this, &MainWindow::slotHttpChangeUserData, Qt::DirectConnection);
     connect(m_Server, &CustomServer::clientConnected,this, &MainWindow::refreshClientConnected);
     connect(m_Server, &CustomServer::clientDisconnected,this, &MainWindow::refreshClientDisconnected);
     connect(m_Server, &CustomServer::dataReceived,this, &MainWindow::refreshDataReceived);
-    
-
-    
-    
-
 }
 
 void MainWindow::ShowUserData(const QString &className, const QString &userName)
 {
-    m_UserCurrdata = m_model->getUserData(className,userName);
-    if(m_UserCurrdata.isEmpty())
+    // 关键修改：获取结构化数据（QList<UserRecord>）
+    QList<UserRecord> userRecords = m_model->getUserData(className, userName);
+    if(userRecords.isEmpty())
     {
-        qDebug()<<"class userName is NUll";
-        QMessageBox::information(this,
-                                 "提示",
-                                 "class userName is NULL",
-                                 QMessageBox::Ok);
+        qDebug()<<"用户"<<userName<<"无数据";
+        QMessageBox::information(this, "提示", QString("用户%1暂无数据").arg(userName));
         ui->datatreeWidget->clear();
         return;
     }
-    qDebug()<<m_UserCurrdata.first();
+    
+    qDebug()<<"用户"<<userName<<"第一条数据："<<userRecords.first().serialNumber<<userRecords.first().interest<<userRecords.first().status;
     ui->datatreeWidget->clear();
-    for (int i = 0; i < m_UserCurrdata.size(); ++i) {
-           // 获取当前行的数据（一条包含3个元素的QVariantList）
-           const QVariantList& currentItem = m_UserCurrdata[i];
-
-           // 安全检查：确保当前行数据包含至少3个元素
-           if (currentItem.size() < 3) {
-               // 输出警告信息，提示哪条数据不完整
-               qWarning() << QString("第%1条数据不完整（少于3个元素），已跳过").arg(i);
-               continue; // 跳过不完整的数据，处理下一条
-           }
-
-           // 创建树节点项，用于存储当前行的数据
-           QTreeWidgetItem* treeItem = new QTreeWidgetItem();
-
-           // 设置第一列数据（序号，整数类型）
-           // 将QVariant(int)转换为字符串显示
-           treeItem->setText(0, currentItem[0].toString());
-           // 存储原始整数类型到UserRole，用于后续可能的排序或数据处理
-           treeItem->setData(0, Qt::UserRole, currentItem[0]);
-
-           // 设置第二列数据（信息，字符串类型）
-           treeItem->setText(1, currentItem[1].toString());
-
-           // 设置第三列数据（状态，字符串类型）
-           treeItem->setText(2, currentItem[2].toString());
-
-           // 将创建好的节点添加到树控件中作为顶级节点
-           ui->datatreeWidget->addTopLevelItem(treeItem);
-       }
-
-       // 自动调整每列的宽度，使其刚好能容纳该列中最长的内容
-       for (int col = 0; col < 3; ++col) {
-           ui->datatreeWidget->resizeColumnToContents(col);
-       }
-
-       // 输出调试信息，提示成功插入的数据数量
-       qDebug() << QString("数据插入完成，共插入%1条有效数据").arg(ui->datatreeWidget->topLevelItemCount());
+    
+    // 遍历结构化记录，展示到树控件
+    for (int i = 0; i < userRecords.size(); ++i) {
+        const UserRecord& record = userRecords[i];
+        QTreeWidgetItem* treeItem = new QTreeWidgetItem();
+        
+        // 直接通过结构体成员赋值，无需解析QVariant
+        treeItem->setText(0, QString::number(record.serialNumber)); // 序号
+        treeItem->setData(0, Qt::UserRole, record.serialNumber);    // 存储原始整数
+        treeItem->setText(1, record.interest);                     // 兴趣
+        treeItem->setText(2, record.status);                       // 状态
+        
+        ui->datatreeWidget->addTopLevelItem(treeItem);
+    }
+    
+    // 自动调整列宽
+    for (int col = 0; col < 3; ++col) {
+        ui->datatreeWidget->resizeColumnToContents(col);
+    }
+    
+    qDebug() << QString("数据插入完成，共插入%1条有效数据").arg(ui->datatreeWidget->topLevelItemCount());
 }
 
 void MainWindow::setClassMemberMap()
@@ -161,86 +154,58 @@ void MainWindow::setClassMemberMap()
         QTreeWidgetItem *classItem = ui->classtreeWidget->topLevelItem(i);
         if (!classItem) continue;
         
-        // 获取班级名称（顶层节点的文本）
         QString className = classItem->text(0);
         if (className.isEmpty()) continue;
         
-        // 遍历当前班级节点的子节点（成员节点），收集成员名称
+        // 遍历班级子节点（成员）
         QStringList memberList;
         for (int j = 0; j < classItem->childCount(); ++j) {
             QTreeWidgetItem *memberItem = classItem->child(j);
             if (memberItem) {
-                // 添加成员节点的文本（假设成员名称在第0列）
                 memberList << memberItem->text(0);
             }
         }
         
-        // 将“班级名-成员列表”存入映射
         classMemberMap[className] = memberList;
     }
     
-    // 将映射传递给服务器（需要在CustomServer中添加对应的接口）
     m_Server->setClassMemberMap(classMemberMap);
     qDebug()<<"classMemberMap:"<<classMemberMap;
 }
 
 void MainWindow::on_btn_Dlenum_clicked()
 {
-     m_userDataItem = ui->datatreeWidget->currentItem();
-     if (m_userDataItem)
-     {
-        int index =m_userDataItem->text(0).toInt();
-        qDebug()<<"delete 行号: "<< ui->datatreeWidget->indexOfTopLevelItem(m_userDataItem)<<"序列号： "<<index;
-        ui->datatreeWidget->takeTopLevelItem( ui->datatreeWidget->indexOfTopLevelItem(m_userDataItem));
-        m_model->deleteUserData(m_CurClassStr,m_CurUserStr,index);
-     }else
-     {
-         QMessageBox::warning(nullptr, "警告", "请先选中要删除的行");
-     }
+    m_userDataItem = ui->datatreeWidget->currentItem();
+    if (!m_userDataItem) {
+        QMessageBox::warning(nullptr, "警告", "请先选中要删除的行");
+        return;
+    }
+    
+    // 关键修改：获取记录序号和行索引（数据库按行索引删除）
+    int serialNumber = m_userDataItem->text(0).toInt();
+    int rowNum = ui->datatreeWidget->indexOfTopLevelItem(m_userDataItem);
+    qDebug()<<"删除 行号: "<<rowNum<<"序列号： "<<serialNumber;
+    
+    // 从界面和模型中删除
+    ui->datatreeWidget->takeTopLevelItem(rowNum);
+    m_model->deleteUserData(m_CurClassStr, m_CurUserStr, rowNum); // 传入行索引，而非序号
 }
-
-//void LeftIconComboBox::paintEvent(QPaintEvent *e)
-//{
-//    QStylePainter painter(this);
-//    painter.setPen(palette().color(QPalette::Text));
-
-//    // 绘制基础控件
-//    QStyleOptionComboBox opt;
-//    initStyleOption(&opt);
-//    painter.drawComplexControl(QStyle::CC_ComboBox, opt);
-
-//    // 手动绘制左侧图标
-//    if (currentIndex() >= 0) {
-//        QIcon icon = itemIcon(currentIndex());
-//        if (!icon.isNull()) {
-//            QRect iconRect = opt.rect.adjusted(4, 0, -opt.rect.width() + 24, 0); // 左对齐坐标
-//            icon.paint(&painter, iconRect, Qt::AlignLeft);
-//        }
-//    }
-
-//    // 绘制文本（向右偏移避开图标）
-//    opt.rect.adjust(30, 0, 0, 0);
-//    painter.drawControl(QStyle::CE_ComboBoxLabel, opt);
-//}
-
-
 
 void MainWindow::on_btn_changenum_clicked()
 {
     m_userDataItem = ui->datatreeWidget->currentItem();
-    if (m_userDataItem)
-    {
-        if(!m_rowAllow)
-        {
-            m_CurindexStr = m_userDataItem->text(0);
-        }
-        m_rowAllow = true;
-        m_userDataItem->setFlags(m_userDataItem->flags() | Qt::ItemIsEditable);
-        qDebug()<<"changeable: "<<m_userDataItem->text(0)<<m_userDataItem->text(1)<<m_userDataItem->text(2);
-    }else
-    {
+    if (!m_userDataItem) {
         QMessageBox::warning(nullptr, "警告", "请先选中要修改的行");
+        return;
     }
+    
+    if(!m_rowAllow)
+    {
+        m_CurindexStr = m_userDataItem->text(0); // 记录原始序号
+    }
+    m_rowAllow = true;
+    m_userDataItem->setFlags(m_userDataItem->flags() | Qt::ItemIsEditable);
+    qDebug()<<"可编辑行： "<<m_userDataItem->text(0)<<m_userDataItem->text(1)<<m_userDataItem->text(2);
 }
 
 void MainWindow::on_btn_HttpStatus_clicked()
@@ -250,12 +215,16 @@ void MainWindow::on_btn_HttpStatus_clicked()
         if (m_Server->getServerState() == SERVER_STATE_STOPPED)
         {
             setClassMemberMap();
-            m_Server->startServer(9999);
-            m_httpText = false;
-            ui->btn_HttpStatus->setText("关闭Https");
+            bool startSuccess = m_Server->startServer(9999);
+            if (startSuccess) {
+                m_httpText = false;
+                ui->btn_HttpStatus->setText("关闭HTTP");
+            } else {
+                QMessageBox::critical(nullptr, "错误", "打开HTTP服务失败");
+            }
         }else
         {
-            QMessageBox::critical(nullptr, "错误", "打开http服务失败");
+            QMessageBox::warning(nullptr, "提示", "HTTP服务已在运行");
         }
     }else
     {
@@ -263,40 +232,34 @@ void MainWindow::on_btn_HttpStatus_clicked()
         {
             m_Server->stopServer();
             m_httpText = true;
-            ui->btn_HttpStatus->setText("打开Https");
+            ui->btn_HttpStatus->setText("打开HTTP");
         }else
         {
-            QMessageBox::critical(nullptr, "错误", "关闭http服务失败");
+            QMessageBox::critical(nullptr, "错误", "关闭HTTP服务失败");
         }
     }
 }
 
 void MainWindow::refreshClientConnected(const QString &clientInfo)
 {
-    
+    qDebug()<<"客户端连接："<<clientInfo;
 }
 
 void MainWindow::refreshClientDisconnected(const QString &clientInfo)
 {
-    
+    qDebug()<<"客户端断开："<<clientInfo;
 }
 
 void MainWindow::refreshDataReceived(const QString &clientInfo, const QString &data)
 {
-    
+    qDebug()<<"收到客户端"<<clientInfo<<"数据："<<data;
 }
 
 void MainWindow::slotHttpChangeUserData(QString className, QString memberName, int id, QString newInfo, QString newStatus)
 {
     m_model->HttpChangeUserData(className, memberName, id, newInfo, newStatus);
-    QTreeWidgetItem * curClassItem = ui->classtreeWidget->currentItem();
-    if(curClassItem!=nullptr)
-    {
-        if(curClassItem->parent()->text(0) == className && curClassItem->text(0) == memberName)
-        {
-           ShowUserData(className,memberName);
-        }
+    // 若当前展示的是该用户数据，刷新界面
+    if (m_CurClassStr == className && m_CurUserStr == memberName) {
+        ShowUserData(className, memberName);
     }
-
 }
-
