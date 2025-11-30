@@ -20,21 +20,18 @@ public:
 
     // 获取当前服务器状态（供外部查询）
     SERVER_STATE getServerState() const { return m_state; }
-    // 获取当前监听的端口（若运行中）
+    // 获取当前监听的端口
     quint16 getListeningPort() const {
         return m_tcpServer->isListening() ? m_tcpServer->serverPort() : 0;
     }
     void setClassMemberMap(const QMap<QString, QStringList> &map);
 
 signals:
-    // 服务器状态变化信号（状态 + 描述信息）
+    // 服务器状态变化信号
     void serverStateChanged(SERVER_STATE state, const QString &statusInfo);
-    // 其他原有信号...
     void clientConnected(const QString &clientInfo);
     void clientDisconnected(const QString &clientInfo);
     void dataReceived(const QString &clientInfo, const QString &data);
-    // 定义请求信号：向MainWindow请求班级列表
-    void sglRequestClassList();
     
     void sglHttpChangeUserData(QString className, QString memberName, int id, QString newInfo, QString newStatus);
     

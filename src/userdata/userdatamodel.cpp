@@ -2,6 +2,7 @@
 #include "src/database/databasemanager.h"
 #include <QDebug>
 #include <QMessageBox>
+#include "common.h"
 
 UserDataModel::UserDataModel(QObject *parent) : QObject(parent) {}
 
@@ -34,7 +35,7 @@ void UserDataModel::setUserData(const QString &className, const QString &userNam
         classInfo.users.append({userName, records}); // 新增用户
     }
     
-    // 同步数据库（需DatabaseManager适配QList<UserRecord>）
+    // 同步数据库
     bool success = DatabaseManager::getInstance().saveUserData(className, userName, records);
     qDebug() << "已存储数据 - 班级:" << className
              << "用户:" << userName
@@ -44,15 +45,30 @@ void UserDataModel::setUserData(const QString &className, const QString &userNam
 
 QList<UserRecord> UserDataModel::getUserData(const QString &className, const QString &userName) {
     QMutexLocker locker(&m_mutex);
+    qDebug() << "查找条件：className=" << className << " | userName=" << userName;
     if (m_classMap.contains(className)) {
+        qDebug() << "找到班级：" << className;
         const ClassInfo &classInfo = m_classMap[className];
+        
+        QStringList userNames;
+        for (const User &user : classInfo.users) {
+            userNames.append(user.userName);
+        }
+        qDebug() << "该班级下所有用户：" << userNames;
+        
+        // 查找目标用户
         for (const User &user : classInfo.users) {
             if (user.userName == userName) {
-                return user.records; // 返回用户的记录列表
+                qDebug() << "找到用户：" << userName << "，记录数：" << user.records.size();
+                return user.records;
             }
         }
+        qDebug() << "班级" << className << "中无用户：" << userName;
+    } else {
+        qDebug() << "未找到班级：" << className;
     }
-    return QList<UserRecord>(); // 空列表
+    qDebug() << "===== getUserData 返回空列表 =====";
+    return QList<UserRecord>();
 }
 
 QStringList UserDataModel::getMembersByClass(const QString &className) {
@@ -102,42 +118,56 @@ void UserDataModel::deleteUserData(const QString &className, const QString &user
     QMessageBox::warning(nullptr, "提示", "用户不存在：" + userName);
 }
 
-void UserDataModel::ChangeUserData(int oldNum, int newNum, const QString &newInfo, const QString &newStatus) {
-    QMutexLocker locker(&m_mutex);
-    bool updated = false;
+bool UserDataModel::changeUserRecords(const QString &className, const QString &userName, const QList<UserRecord> &records)
+{
+    QMutexLocker locker(&m_mutex);  // 保证线程安全
     
-    // 遍历所有班级和用户
-    for (ClassInfo &classInfo : m_classMap) {
-        for (User &user : classInfo.users) {
-            for (int i = 0; i < user.records.size(); ++i) {
-                UserRecord &record = user.records[i];
-                if (record.serialNumber == oldNum) {
-                    // 更新记录属性
-                    record.serialNumber = newNum;
-                    record.interest = newInfo;
-                    record.status = newStatus;
-                    
-                    // 同步数据库
-                    bool dbSuccess = DatabaseManager::getInstance().updateUserData(
-                        classInfo.className, user.userName, i, newNum, newInfo, newStatus);
-                    
-                    qDebug() << "更新数据 - 班级:" << classInfo.className
-                             << "用户:" << user.userName
-                             << "原序号:" << oldNum
-                             << "新序号:" << newNum
-                             << "新信息:" << newNum
-                             << "新:" << newNum
-                             << "数据库同步:" << (dbSuccess ? "成功" : "失败");
-                    
-                    updated = true;
-                    return; // 假设序号唯一，找到后退出
-                }
-            }
-        }
+    // 1. 输入参数校验
+    if (className.isEmpty() || userName.isEmpty() || records.isEmpty()) {
+        qDebug() << "changeUserRecords: 输入参数无效（班级名/用户名空或记录列表空）";
+        return false;
     }
     
-    if (!updated) {
-        qDebug() << "未找到序号为" << oldNum << "的条目";
+    // 2. 定位目标班级（利用 QMap 的 key 快速查找）
+    if (!m_classMap.contains(className)) {
+        qDebug() << "changeUserRecords: 未找到班级" << className;
+        return false;
+    }
+    ClassInfo& targetClass = m_classMap[className];  // 引用，直接修改原数据
+    
+    // 3. 定位目标用户（遍历班级内的用户列表）
+    User* targetUser = nullptr;
+    for (User& user : targetClass.users) {
+        if (user.userName == userName) {
+            targetUser = &user;
+            break;
+        }
+    }
+    if (!targetUser) {
+        qDebug() << "changeUserRecords: 未找到班级[" << className << "]中的用户" << userName;
+        return false;
+    }
+    
+    // 4. 替换内存中的记录（核心逻辑）
+    targetUser->records = records;
+    
+    // 5. 同步数据库（复用 DatabaseManager 的 saveUserData，避免冗余）
+    bool dbSuccess = DatabaseManager::getInstance().saveUserData(
+        className,  // 目标班级
+        userName,   // 目标用户
+        records     // 新记录列表
+        );
+    
+    // 6. 结果处理与日志
+    if (dbSuccess) {
+        qDebug() << "changeUserRecords: 成功更新班级[" << className << "]-用户[" << userName << "]的记录（共" << records.size() << "条）";
+        return true;
+    } else {
+        qDebug() << "changeUserRecords: 数据库同步失败（班级：" << className << "，用户：" << userName << "）";
+        // 可选：数据库同步失败时，回滚内存数据（恢复修改前的记录）
+        // 需提前缓存旧记录：QList<UserRecord> oldRecords = targetUser->records;
+        // targetUser->records = oldRecords;
+        return false;
     }
 }
 

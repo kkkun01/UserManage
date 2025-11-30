@@ -24,8 +24,6 @@ class MainWindow : public QMainWindow
   private slots:
     void on_btn_Dlenum_clicked();
     
-    void on_btn_changenum_clicked();
-    
     void on_btn_HttpStatus_clicked();
     
     void refreshClientConnected(const QString &clientInfo);
@@ -34,11 +32,12 @@ class MainWindow : public QMainWindow
     
     void refreshDataReceived(const QString &clientInfo, const QString &data);
     
-    // HTTP修改数据的槽函数（保持原有参数，内部适配结构体）
+    // HTTP修改数据的槽函数
     void slotHttpChangeUserData(QString className, QString memberName, int id, QString newInfo, QString newStatus);
     
-//    // 新增：接收线程数据生成完成的信号（刷新界面数据）
-//    void slotDataGenerated(const QString &className, const QString &userName);
+    void on_btn_change_clicked();
+    
+    void on_btn_edit_clicked();
     
   private:
     Ui::MainWindow *ui;
@@ -46,23 +45,27 @@ class MainWindow : public QMainWindow
     ClassUserThread *m_UserThread = nullptr;
     QTreeWidgetItem *m_currentItem = nullptr;
     QTreeWidgetItem *m_userDataItem = nullptr;
-    
-    // 关键修改：将 QList<QVariantList> 改为 QList<UserRecord>（结构化存储当前用户数据）
+   
     QList<UserRecord> m_CurUserRecords;
     
     QString m_CurClassStr = "";   // 当前选中班级
     QString m_CurUserStr = "";    // 当前选中用户
     QString m_CurindexStr = "";   // 当前选中记录序号
-    bool m_rowAllow = false;
     bool m_httpText = true;
     CustomServer* m_Server;
+    
+    bool m_isEditEnabled = false;
     
   private:
     void InitMyCombox();
     void ConnectSlot();
-    // 关键修改：参数不变，但内部使用 QList<UserRecord> 展示数据
     void ShowUserData(const QString &className, const QString &userName);
     void setClassMemberMap();
+    void enableAllItemsEdit();  // 开放所有项编辑权限
+    void disableAllItemsEdit(); // 取消所有项编辑权限
+    void traverseAllItems(std::function<void(QTreeWidgetItem*)> callback); // 非递归遍历工具
+    QList<UserRecord> readSelectedUserRecords(); 
+    
 };
 
 #endif // MAINWINDOW_H

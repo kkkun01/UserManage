@@ -5,13 +5,13 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QTableWidgetItem>
+ #include <QStack>
 
 MainWindow::MainWindow(QWidget *parent) :QMainWindow(parent),ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     m_model = new UserDataModel(this);
     m_Server = new CustomServer(this);
-    // 初始化数据库（新增：程序启动时加载数据）
     m_model->initDataBase();
     ConnectSlot();
 }
@@ -23,7 +23,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::InitMyCombox()
 {
-    // 保留原有逻辑（若需使用可解锁）
+
 }
 
 void MainWindow::ConnectSlot()
@@ -51,6 +51,11 @@ void MainWindow::ConnectSlot()
     });
     
     connect(ui->classtreeWidget, &QTreeWidget::itemClicked, this,[this](){
+        if (m_isEditEnabled) {
+            disableAllItemsEdit(); 
+            ui->btn_edit->setText("开放所有编辑权限");
+            m_isEditEnabled = false;
+        }
         m_currentItem = ui->classtreeWidget->currentItem();
         if (!m_currentItem || !m_currentItem->parent()) {
             ui->datatreeWidget->clear();
@@ -60,46 +65,12 @@ void MainWindow::ConnectSlot()
         m_CurUserStr = m_currentItem->text(0);
         ShowUserData(m_CurClassStr, m_CurUserStr);
     });
-    
-//    connect(ui->datatreeWidget, &QTreeWidget::itemClicked, this,[this](){
-//        for (int col = 0; col < 3; ++col) {
-//            ui->datatreeWidget->resizeColumnToContents(col);
-//        }
-//        m_userDataItem = ui->datatreeWidget->currentItem();
-//        if(m_rowAllow && m_userDataItem)
-//        {
-//            // 从树节点获取修改后的数据（序号、兴趣、状态）
-//            int newNum = m_userDataItem->text(0).toInt();
-//            QString newInfo = m_userDataItem->text(1);
-//            QString newStatus = m_userDataItem->text(2);
-//            // 调用模型接口修改数据（按原序号匹配）
-//            m_model->ChangeUserData(m_CurindexStr.toInt(), newNum, newInfo, newStatus);
-//            qDebug()<<"oldnum"<<m_CurindexStr.toInt()<<"new num"<<newNum<<newInfo<<newStatus;
-//            m_CurindexStr = QString::number(newNum);
-//            m_userDataItem->setFlags(m_userDataItem->flags() & ~Qt::ItemIsEditable);
-//        }else if(!m_rowAllow)
-//        {
-//            QMessageBox::information(this, "提示", "请点击编辑按钮");
-//        }
-//        });
-        connect(ui->datatreeWidget, &QTreeWidget::itemClicked, this,[this](){
-            for (int col = 0; col < 3; ++col) {
-                ui->datatreeWidget->resizeColumnToContents(col);
-            }
-            if(m_rowAllow)
-            {
-                m_model->ChangeUserData(m_CurindexStr.toInt(), m_userDataItem->text(0).toInt(),m_userDataItem->text(1),m_userDataItem->text(2));
-                qDebug()<<"oldnum"<<m_CurindexStr.toInt()<<"new num"<<m_userDataItem->text(0).toInt()<<m_userDataItem->text(1)<<m_userDataItem->text(2);
-                m_CurindexStr = m_userDataItem->text(0);
-            }else
-            {
-                QMessageBox::information(this,
-                                         "提示",
-                                         "请点击编辑按钮",
-                                         QMessageBox::Ok);
-            }
-        });
-        
+    connect(ui->datatreeWidget, &QTreeWidget::itemClicked, this,[this](){
+        if(!m_isEditEnabled)
+        {
+            QMessageBox::information(this,"提示","请点击编辑按钮",QMessageBox::Ok);
+        }
+    });
     connect(m_Server, &CustomServer::sglHttpChangeUserData,this, &MainWindow::slotHttpChangeUserData, Qt::DirectConnection);
     connect(m_Server, &CustomServer::clientConnected,this, &MainWindow::refreshClientConnected);
     connect(m_Server, &CustomServer::clientDisconnected,this, &MainWindow::refreshClientDisconnected);
@@ -108,11 +79,10 @@ void MainWindow::ConnectSlot()
 
 void MainWindow::ShowUserData(const QString &className, const QString &userName)
 {
-    // 关键修改：获取结构化数据（QList<UserRecord>）
     QList<UserRecord> userRecords = m_model->getUserData(className, userName);
     if(userRecords.isEmpty())
     {
-        qDebug()<<"用户"<<userName<<"无数据";
+        qDebug()<<"用户"<<userName<<"无数据（返回空列表）";
         QMessageBox::information(this, "提示", QString("用户%1暂无数据").arg(userName));
         ui->datatreeWidget->clear();
         return;
@@ -191,23 +161,6 @@ void MainWindow::on_btn_Dlenum_clicked()
     m_model->deleteUserData(m_CurClassStr, m_CurUserStr, rowNum); // 传入行索引，而非序号
 }
 
-void MainWindow::on_btn_changenum_clicked()
-{
-    m_userDataItem = ui->datatreeWidget->currentItem();
-    if (!m_userDataItem) {
-        QMessageBox::warning(nullptr, "警告", "请先选中要修改的行");
-        return;
-    }
-    
-    if(!m_rowAllow)
-    {
-        m_CurindexStr = m_userDataItem->text(0); // 记录原始序号
-    }
-    m_rowAllow = true;
-    m_userDataItem->setFlags(m_userDataItem->flags() | Qt::ItemIsEditable);
-    qDebug()<<"可编辑行： "<<m_userDataItem->text(0)<<m_userDataItem->text(1)<<m_userDataItem->text(2);
-}
-
 void MainWindow::on_btn_HttpStatus_clicked()
 {
     if(m_httpText)
@@ -261,5 +214,150 @@ void MainWindow::slotHttpChangeUserData(QString className, QString memberName, i
     // 若当前展示的是该用户数据，刷新界面
     if (m_CurClassStr == className && m_CurUserStr == memberName) {
         ShowUserData(className, memberName);
+    }
+}
+
+void MainWindow::on_btn_edit_clicked()
+{
+    if (!m_isEditEnabled) {
+        // 状态1：未编辑 → 开放编辑权限
+        enableAllItemsEdit();
+        ui->btn_edit->setText(QStringLiteral("取消编辑"));
+        m_isEditEnabled = true;
+        QMessageBox::information(this, QStringLiteral("提示"), QStringLiteral("已开放所有项编辑权限（双击数据进行修改）"));
+    } else {
+        // 状态2：已编辑 → 取消编辑 + 回滚数据
+        disableAllItemsEdit();
+        ui->btn_edit->setText(QStringLiteral("编辑"));
+        m_isEditEnabled = false;
+        QMessageBox::information(this, QStringLiteral("提示"), QStringLiteral("已取消编辑权限，数据已回滚"));
+    }
+}
+void MainWindow::traverseAllItems(std::function<void(QTreeWidgetItem*)> callback)
+{
+    if (!ui->datatreeWidget || !callback) return;
+    
+    QStack<QTreeWidgetItem*> itemStack;
+    // 压入所有顶层项
+    for (int i = 0; i < ui->datatreeWidget->topLevelItemCount(); ++i) {
+        QTreeWidgetItem *topItem = ui->datatreeWidget->topLevelItem(i);
+        if (topItem) itemStack.push(topItem);
+    }
+    
+    // 栈遍历（模拟递归，避免栈溢出）
+    while (!itemStack.isEmpty()) {
+        QTreeWidgetItem *currentItem = itemStack.pop();
+        callback(currentItem); // 执行自定义操作（启用/禁用编辑）
+        
+        // 逆序压入子项（保证遍历顺序与递归一致）
+        for (int i = currentItem->childCount() - 1; i >= 0; --i) {
+            QTreeWidgetItem *childItem = currentItem->child(i);
+            if (childItem) itemStack.push(childItem);
+        }
+    }
+}
+
+// 新增：开放所有项编辑权限
+void MainWindow::enableAllItemsEdit()
+{
+    traverseAllItems([](QTreeWidgetItem *item) {
+        // 启用编辑权限（保留原有标志，仅叠加可编辑属性）
+        item->setFlags(item->flags() | Qt::ItemIsEditable);
+    });
+    
+    // 启用树控件编辑触发方式
+    ui->datatreeWidget->setEditTriggers(QTreeWidget::AllEditTriggers);
+}
+
+void MainWindow::disableAllItemsEdit()
+{
+    ShowUserData(m_CurClassStr, m_CurUserStr);
+    
+    // 2. 禁用所有项的编辑权限
+    traverseAllItems([](QTreeWidgetItem *item) {
+        // 移除可编辑标志（保留其他原有属性）
+        item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    });
+    
+    // 3. 禁用树控件编辑触发
+    ui->datatreeWidget->setEditTriggers(QTreeWidget::NoEditTriggers);
+}
+
+QList<UserRecord> MainWindow::readSelectedUserRecords()
+{
+    QList<UserRecord> records;
+    if (!ui->datatreeWidget) {
+        qDebug() << "QTreeWidget 未初始化";
+        return records;
+    }
+    
+    qDebug() << "开始读取 QTreeWidget 数据（单层结构，共" << ui->datatreeWidget->topLevelItemCount() << "行）";
+    
+    // 单层结构：遍历所有顶层项（记录行）
+    for (int i = 0; i < ui->datatreeWidget->topLevelItemCount(); ++i) {
+        QTreeWidgetItem *recordItem = ui->datatreeWidget->topLevelItem(i);
+        if (!recordItem) {
+            qDebug() << "第" << i << "行：记录项为空，跳过";
+            continue;
+        }
+        
+        // 按列索引读取数据
+        UserRecord record;
+        record.serialNumber = recordItem->text(0).toInt();
+        record.interest = recordItem->text(1);
+        record.status = recordItem->text(2);
+        records.append(record);
+        
+        // 打印当前行的完整数据（调试用）
+        qDebug() << "第" << i + 1 << "行数据："
+                 << "序号=" << record.serialNumber
+                 << "，兴趣=" << record.interest
+                 << "，状态=" << record.status
+                 << "（原始列文本：列0=" << recordItem->text(0)
+                 << "，列1=" << recordItem->text(1)
+                 << "，列2=" << recordItem->text(2) << "）";
+    }
+    
+    // 最终统计打印
+    qDebug() << "数据读取完成，共读取到" << records.size() << "条记录";
+    return records;
+}
+
+// 确认修改按钮槽函数（核心逻辑）
+void MainWindow::on_btn_change_clicked()
+{
+    // 1. 先关闭编辑模式（可选，避免后续误操作）
+    if (m_isEditEnabled) {
+        ui->btn_edit->setText("开放所有编辑权限");
+        m_isEditEnabled = false;
+    }
+    
+    // 2. 校验已有成员变量（班级名/用户名）是否有效
+    if (m_CurClassStr.isEmpty() || m_CurUserStr.isEmpty()) {
+        QMessageBox::warning(this, "警告", "未选中有效用户（班级名/用户名为空）！");
+        return;
+    }
+    
+    // 3. 读取选中用户的修改后记录
+    QList<UserRecord> modifiedRecords = readSelectedUserRecords();
+    if (modifiedRecords.isEmpty()) {
+        QMessageBox::warning(this, "警告", "该用户无任何记录可修改！");
+        return;
+    }
+    
+    // 4. 传入 UserDataModel 执行修改（使用已有成员变量定位，传入新记录）
+    bool modifySuccess = m_model->changeUserRecords(
+        m_CurClassStr,  
+        m_CurUserStr,   
+        modifiedRecords 
+        );
+    
+    // 5. 提示操作结果
+    if (modifySuccess) {
+        QMessageBox::information(this, "成功", 
+            QString("已成功修改「%1-%2」的记录！").arg(m_CurClassStr).arg(m_CurUserStr));
+    } else {
+        QMessageBox::critical(this, "失败", 
+            QString("修改「%1-%2」的记录失败！").arg(m_CurClassStr).arg(m_CurUserStr));
     }
 }

@@ -35,7 +35,8 @@ public:
     QHBoxLayout *horizontalLayout;
     QPushButton *btn_makenum;
     QPushButton *btn_Dlenum;
-    QPushButton *btn_changenum;
+    QPushButton *btn_edit;
+    QPushButton *btn_change;
     QPushButton *btn_HttpStatus;
     QMenuBar *menuBar;
     QMenu *menu;
@@ -67,9 +68,9 @@ public:
         datatreeWidget->setGeometry(QRect(250, 50, 431, 291));
         layoutWidget = new QWidget(centralWidget);
         layoutWidget->setObjectName(QString::fromUtf8("layoutWidget"));
-        layoutWidget->setGeometry(QRect(61, 380, 571, 30));
+        layoutWidget->setGeometry(QRect(62, 380, 621, 30));
         horizontalLayout = new QHBoxLayout(layoutWidget);
-        horizontalLayout->setSpacing(25);
+        horizontalLayout->setSpacing(6);
         horizontalLayout->setContentsMargins(11, 11, 11, 11);
         horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
         horizontalLayout->setContentsMargins(0, 0, 0, 0);
@@ -83,10 +84,15 @@ public:
 
         horizontalLayout->addWidget(btn_Dlenum);
 
-        btn_changenum = new QPushButton(layoutWidget);
-        btn_changenum->setObjectName(QString::fromUtf8("btn_changenum"));
+        btn_edit = new QPushButton(layoutWidget);
+        btn_edit->setObjectName(QString::fromUtf8("btn_edit"));
 
-        horizontalLayout->addWidget(btn_changenum);
+        horizontalLayout->addWidget(btn_edit);
+
+        btn_change = new QPushButton(layoutWidget);
+        btn_change->setObjectName(QString::fromUtf8("btn_change"));
+
+        horizontalLayout->addWidget(btn_change);
 
         btn_HttpStatus = new QPushButton(layoutWidget);
         btn_HttpStatus->setObjectName(QString::fromUtf8("btn_HttpStatus"));
@@ -155,7 +161,8 @@ public:
 
         btn_makenum->setText(QApplication::translate("MainWindow", "\347\224\237\346\210\220\351\232\217\346\234\272\346\225\260", nullptr));
         btn_Dlenum->setText(QApplication::translate("MainWindow", "\345\210\240\351\231\244", nullptr));
-        btn_changenum->setText(QApplication::translate("MainWindow", "\344\277\256\346\224\271", nullptr));
+        btn_edit->setText(QApplication::translate("MainWindow", "\347\274\226\350\276\221", nullptr));
+        btn_change->setText(QApplication::translate("MainWindow", "\347\241\256\350\256\244\344\277\256\346\224\271", nullptr));
         btn_HttpStatus->setText(QApplication::translate("MainWindow", "\346\211\223\345\274\200Http", nullptr));
         menu->setTitle(QApplication::translate("MainWindow", "\351\246\226\351\241\265", nullptr));
     } // retranslateUi

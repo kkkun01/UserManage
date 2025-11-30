@@ -20,18 +20,11 @@ QString LoadQssFile(const QString &path)
     return "";
 }
 
-bool InitDataBase()
-{
-    UserDataModel model;
-    model.initDataBase(); // 初始化数据库并加载数据
-}
-
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     a.setStyleSheet(LoadQssFile(":/qss/mystyle.qss"));//“a.setStyleSheet(LoadQssFile(":/qss/mystyle.qss"))”
-    InitDataBase();
     MainWindow w;
     w.show();
 

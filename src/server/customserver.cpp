@@ -5,13 +5,11 @@ CustomServer::CustomServer(QObject *parent) : QObject(parent)
 {
     m_tcpServer = new QTcpServer(this);
     ConnectInit();
-    emit sglRequestClassList();
 }
 
 bool CustomServer::startServer(quint16 port)
 {
     if (m_state == SERVER_STATE_RUNNING) {
-        // 若已运行，先停止
         stopServer();
     }
 
@@ -53,15 +51,11 @@ void CustomServer::onNewConnection()
     if (!clientSocket) return;
     
     // 客户端连接信息
-    QString clientInfo = QString("%1:%2")
-                             .arg(clientSocket->peerAddress().toString())
-                             .arg(clientSocket->peerPort());
+    QString clientInfo = QString("%1:%2").arg(clientSocket->peerAddress().toString()).arg(clientSocket->peerPort());
     m_clientSockets.append(clientSocket);
     
-    // ==== 拼接“班级+成员”数据 ====
     QStringList classAndMembers; // 存储每个“班级|成员列表”字符串
     
-    // 遍历班级-成员映射（m_classMemberMap是QMap<QString, QStringList>类型）
     for (auto it = m_classMemberMap.begin(); it != m_classMemberMap.end(); ++it) {
         QString className = it.key(); // 班级名
         QStringList members = it.value(); // 成员列表
@@ -93,9 +87,7 @@ void CustomServer::onReadyRead()
     
     // 1. 保留原有逻辑：读取数据并发射dataReceived信号
     QByteArray data = clientSocket->readAll();
-    QString clientInfo = QString("%1:%2")
-                             .arg(clientSocket->peerAddress().toString())
-                             .arg(clientSocket->peerPort());
+    QString clientInfo = QString("%1:%2").arg(clientSocket->peerAddress().toString()).arg(clientSocket->peerPort());
     emit dataReceived(clientInfo, data); // 保留原有功能
     
     
@@ -136,9 +128,7 @@ void CustomServer::onDisconnected()
     QTcpSocket *clientSocket = qobject_cast<QTcpSocket*>(sender());
     if (!clientSocket) return;
 
-    QString clientInfo = QString("%1:%2")
-                         .arg(clientSocket->peerAddress().toString())
-                         .arg(clientSocket->peerPort());
+    QString clientInfo = QString("%1:%2").arg(clientSocket->peerAddress().toString()).arg(clientSocket->peerPort());
     m_clientSockets.removeOne(clientSocket);
     clientSocket->deleteLater();
 
@@ -147,6 +137,5 @@ void CustomServer::onDisconnected()
 
 void CustomServer::ConnectInit()
 {
-    connect(m_tcpServer, &QTcpServer::newConnection,
-            this, &CustomServer::onNewConnection);
+    connect(m_tcpServer, &QTcpServer::newConnection,this, &CustomServer::onNewConnection);
 }

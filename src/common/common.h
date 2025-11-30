@@ -47,8 +47,4 @@ struct ClassInfo {
     QList<User> users;              // 班级内所有用户
 };
 
-
-
-
-
 #endif // COMMON_H

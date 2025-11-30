@@ -16,7 +16,7 @@ void ClassUserThread::run()
     
     QStringList infoList = {"喜欢玩", "喜欢学习", "喜欢运动"};
     QStringList statusList = {"学习", "休息", "娱乐"};
-    QList<UserRecord> dataList;  // 改为 UserRecord 列表，而非 QVariantList
+    QList<UserRecord> dataList;
     
     // 仅使用线程ID生成唯一种子（保持原有随机逻辑不变）
     std::thread::id threadId = std::this_thread::get_id();
@@ -31,9 +31,9 @@ void ClassUserThread::run()
     // 生成100条随机数据：构造 UserRecord 结构体
     for (int i = 0; i < 100; ++i) {
         UserRecord record;
-        record.serialNumber = i;                  // 序号（原 i 对应 serialNumber）
-        record.interest = infoList[infoDist(gen)]; // 兴趣（原 info 对应 interest）
-        record.status = statusList[statusDist(gen)]; // 状态（原 status 对应 status）
+        record.serialNumber = i;                  // 序号（对应 serialNumber）
+        record.interest = infoList[infoDist(gen)]; // 兴趣（对应 interest）
+        record.status = statusList[statusDist(gen)]; // 状态（对应 status）
         dataList.append(record);                  // 添加到结构化列表
     }
     
@@ -42,7 +42,6 @@ void ClassUserThread::run()
              << "兴趣=" << dataList.first().interest 
              << "状态=" << dataList.first().status;
     
-    // 调用模型接口：传入 UserRecord 列表（与新的 setUserData 接口匹配）
     m_model->setUserData(m_className, m_userName, dataList);
     emit sglDataGenerated(m_className, m_userName);
 }

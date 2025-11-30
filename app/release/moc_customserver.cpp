@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_CustomServer_t {
-    QByteArrayData data[21];
-    char stringdata0[254];
+    QByteArrayData data[20];
+    char stringdata0[234];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -42,26 +42,24 @@ QT_MOC_LITERAL(7, 79, 10), // "clientInfo"
 QT_MOC_LITERAL(8, 90, 18), // "clientDisconnected"
 QT_MOC_LITERAL(9, 109, 12), // "dataReceived"
 QT_MOC_LITERAL(10, 122, 4), // "data"
-QT_MOC_LITERAL(11, 127, 19), // "sglRequestClassList"
-QT_MOC_LITERAL(12, 147, 21), // "sglHttpChangeUserData"
-QT_MOC_LITERAL(13, 169, 9), // "className"
-QT_MOC_LITERAL(14, 179, 10), // "memberName"
-QT_MOC_LITERAL(15, 190, 2), // "id"
-QT_MOC_LITERAL(16, 193, 7), // "newInfo"
-QT_MOC_LITERAL(17, 201, 9), // "newStatus"
-QT_MOC_LITERAL(18, 211, 15), // "onNewConnection"
-QT_MOC_LITERAL(19, 227, 11), // "onReadyRead"
-QT_MOC_LITERAL(20, 239, 14) // "onDisconnected"
+QT_MOC_LITERAL(11, 127, 21), // "sglHttpChangeUserData"
+QT_MOC_LITERAL(12, 149, 9), // "className"
+QT_MOC_LITERAL(13, 159, 10), // "memberName"
+QT_MOC_LITERAL(14, 170, 2), // "id"
+QT_MOC_LITERAL(15, 173, 7), // "newInfo"
+QT_MOC_LITERAL(16, 181, 9), // "newStatus"
+QT_MOC_LITERAL(17, 191, 15), // "onNewConnection"
+QT_MOC_LITERAL(18, 207, 11), // "onReadyRead"
+QT_MOC_LITERAL(19, 219, 14) // "onDisconnected"
 
     },
     "CustomServer\0serverStateChanged\0\0"
     "SERVER_STATE\0state\0statusInfo\0"
     "clientConnected\0clientInfo\0"
     "clientDisconnected\0dataReceived\0data\0"
-    "sglRequestClassList\0sglHttpChangeUserData\0"
-    "className\0memberName\0id\0newInfo\0"
-    "newStatus\0onNewConnection\0onReadyRead\0"
-    "onDisconnected"
+    "sglHttpChangeUserData\0className\0"
+    "memberName\0id\0newInfo\0newStatus\0"
+    "onNewConnection\0onReadyRead\0onDisconnected"
 };
 #undef QT_MOC_LITERAL
 
@@ -71,33 +69,31 @@ static const uint qt_meta_data_CustomServer[] = {
        8,       // revision
        0,       // classname
        0,    0, // classinfo
-       9,   14, // methods
+       8,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
-       6,       // signalCount
+       5,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    2,   59,    2, 0x06 /* Public */,
-       6,    1,   64,    2, 0x06 /* Public */,
-       8,    1,   67,    2, 0x06 /* Public */,
-       9,    2,   70,    2, 0x06 /* Public */,
-      11,    0,   75,    2, 0x06 /* Public */,
-      12,    5,   76,    2, 0x06 /* Public */,
+       1,    2,   54,    2, 0x06 /* Public */,
+       6,    1,   59,    2, 0x06 /* Public */,
+       8,    1,   62,    2, 0x06 /* Public */,
+       9,    2,   65,    2, 0x06 /* Public */,
+      11,    5,   70,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-      18,    0,   87,    2, 0x0a /* Public */,
-      19,    0,   88,    2, 0x0a /* Public */,
-      20,    0,   89,    2, 0x0a /* Public */,
+      17,    0,   81,    2, 0x0a /* Public */,
+      18,    0,   82,    2, 0x0a /* Public */,
+      19,    0,   83,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void, 0x80000000 | 3, QMetaType::QString,    4,    5,
     QMetaType::Void, QMetaType::QString,    7,
     QMetaType::Void, QMetaType::QString,    7,
     QMetaType::Void, QMetaType::QString, QMetaType::QString,    7,   10,
-    QMetaType::Void,
-    QMetaType::Void, QMetaType::QString, QMetaType::QString, QMetaType::Int, QMetaType::QString, QMetaType::QString,   13,   14,   15,   16,   17,
+    QMetaType::Void, QMetaType::QString, QMetaType::QString, QMetaType::Int, QMetaType::QString, QMetaType::QString,   12,   13,   14,   15,   16,
 
  // slots: parameters
     QMetaType::Void,
@@ -117,11 +113,10 @@ void CustomServer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id
         case 1: _t->clientConnected((*reinterpret_cast< const QString(*)>(_a[1]))); break;
         case 2: _t->clientDisconnected((*reinterpret_cast< const QString(*)>(_a[1]))); break;
         case 3: _t->dataReceived((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< const QString(*)>(_a[2]))); break;
-        case 4: _t->sglRequestClassList(); break;
-        case 5: _t->sglHttpChangeUserData((*reinterpret_cast< QString(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< int(*)>(_a[3])),(*reinterpret_cast< QString(*)>(_a[4])),(*reinterpret_cast< QString(*)>(_a[5]))); break;
-        case 6: _t->onNewConnection(); break;
-        case 7: _t->onReadyRead(); break;
-        case 8: _t->onDisconnected(); break;
+        case 4: _t->sglHttpChangeUserData((*reinterpret_cast< QString(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< int(*)>(_a[3])),(*reinterpret_cast< QString(*)>(_a[4])),(*reinterpret_cast< QString(*)>(_a[5]))); break;
+        case 5: _t->onNewConnection(); break;
+        case 6: _t->onReadyRead(); break;
+        case 7: _t->onDisconnected(); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
@@ -155,16 +150,9 @@ void CustomServer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id
             }
         }
         {
-            using _t = void (CustomServer::*)();
-            if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&CustomServer::sglRequestClassList)) {
-                *result = 4;
-                return;
-            }
-        }
-        {
             using _t = void (CustomServer::*)(QString , QString , int , QString , QString );
             if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&CustomServer::sglHttpChangeUserData)) {
-                *result = 5;
+                *result = 4;
                 return;
             }
         }
@@ -200,13 +188,13 @@ int CustomServer::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 9)
+        if (_id < 8)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 9;
+        _id -= 8;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 9)
+        if (_id < 8)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 9;
+        _id -= 8;
     }
     return _id;
 }
@@ -240,16 +228,10 @@ void CustomServer::dataReceived(const QString & _t1, const QString & _t2)
 }
 
 // SIGNAL 4
-void CustomServer::sglRequestClassList()
-{
-    QMetaObject::activate(this, &staticMetaObject, 4, nullptr);
-}
-
-// SIGNAL 5
 void CustomServer::sglHttpChangeUserData(QString _t1, QString _t2, int _t3, QString _t4, QString _t5)
 {
     void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)), const_cast<void*>(reinterpret_cast<const void*>(&_t3)), const_cast<void*>(reinterpret_cast<const void*>(&_t4)), const_cast<void*>(reinterpret_cast<const void*>(&_t5)) };
-    QMetaObject::activate(this, &staticMetaObject, 5, _a);
+    QMetaObject::activate(this, &staticMetaObject, 4, _a);
 }
 QT_WARNING_POP
 QT_END_MOC_NAMESPACE

@@ -8,7 +8,6 @@
 #include <QMap>
 #include <QString>
 #include <QList>
-// 引入包含结构体定义的头文件（假设为common.h）
 #include "common.h"
 
 class DatabaseManager {
@@ -16,29 +15,28 @@ class DatabaseManager {
     // 单例模式，确保全局唯一数据库连接
     static DatabaseManager& getInstance();
     
-    // 初始化数据库（创建表）
+    // 初始化数据库（创建表），默认数据库路径为 user_data.db
     bool initDatabase(const QString& dbPath = "user_data.db");
     
-    // 插入/更新数据（参数改为QList<UserRecord>）
-    bool saveUserData(const QString& className, const QString& userName,
-                      const QList<UserRecord>& records);
+    // 插入/更新数据（接收 UserRecord 列表）
+    bool saveUserData(const QString& className, const QString& userName,const QList<UserRecord>& records);
     
-    // 删除数据（保持不变，rowNum为行索引）
+    // 删除指定行数据
     bool deleteUserData(const QString& className, const QString& userName, int rowNum);
     
-    // 更新数据（保持参数，对应UserRecord的属性）
+    // 更新指定行数据(http模块)
     bool updateUserData(const QString& className, const QString& userName, int rowNum,
                         int num, const QString& info, const QString& status);
     
-    // 从数据库加载数据到内存（返回值改为QMap<QString, ClassInfo>）
     QMap<QString, ClassInfo> loadAllData();
     
+    void printAllData(const QMap<QString, ClassInfo>& allData);
+
   private:
     QSqlDatabase m_db;
     
-    // 私有构造函数，防止外部实例化
     DatabaseManager();
-    // 禁止拷贝
+    ~DatabaseManager(); 
     DatabaseManager(const DatabaseManager&) = delete;
     DatabaseManager& operator=(const DatabaseManager&) = delete;
 };
